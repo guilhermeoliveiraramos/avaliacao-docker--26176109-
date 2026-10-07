@@ -41,7 +41,7 @@ do que texto longo copiado. Resposta que contradiz o seu próprio Dockerfile val
 
 ## Verificador
 
-9. Código de conclusão impresso pelo verificador:
+9. Código de conclusão impresso pelo verificador:VIASERRA-26176109-B0C12B03
 
 ```
 (cole aqui)
