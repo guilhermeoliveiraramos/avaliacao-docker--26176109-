@@ -1,48 +1,56 @@
-# Respostas · Avaliação Prática de Docker · ViaSerra Transportes (Turma C)
+# Respostas da Avaliação Prática · ViaSerra Transportes
 
-Nome:
-Matrícula:
-Usuário do GitHub:
-Usuário do Docker Hub:
+**Aluno:** Guilherme Oliveira Ramos
+**Matrícula:** 26176109
 
-Responda com as suas palavras e com o que aconteceu na SUA máquina. Resposta curta e certa vale mais
-do que texto longo copiado. Resposta que contradiz o seu próprio Dockerfile vale zero.
+---
 
-## Parte 1 · Dockerfile do portal
+### Parte 1 · Dockerfile do portal
 
-1. Qual imagem base você usou e qual o tamanho final da imagem do portal (saída de `docker images`)?
+**Pergunta 1: Por que é necessário indicar a tag da imagem base (ex: `nginx:1.27-alpine`) em vez de usar `latest` ou nenhuma tag?**
+> O uso de tags fixas garante a reprodutibilidade do ambiente de produção. Se utilizarmos `latest` ou nenhuma tag, o Docker descarrega a versão mais recente disponível na altura da compilação, o que pode introduzir quebras de compatibilidade, falhas de segurança inesperadas ou comportamentos inconsistentes em máquinas diferentes.
 
-2. Em qual pasta do container o Nginx procura os arquivos do site? Mostre o comando que você usou para
-   conferir que o `index.html` está lá dentro.
+**Pergunta 2: Por que a instrução `EXPOSE` no Dockerfile não é suficiente para expor a porta do container para a sua máquina?**
+> A instrução `EXPOSE` funciona apenas como documentação técnica dentro da imagem (metadados), indicando em qual porta a aplicação escuta internamente. Ela não cria o redirecionamento de rede no sistema operativo hospedeiro. Para expor a porta para a máquina real, é necessário mapeá-la explicitamente na execução com o parâmetro `-p <porta_host>:<porta_container>` ou no `docker-compose.yml`.
 
-## Parte 2 · Docker Hub
+---
 
-3. Nome completo da imagem publicada e link público do repositório no Docker Hub.
+### Parte 2 · Publicação no Docker Hub
 
-4. Se você mudar o HTML, quais comandos precisa rodar para que a versão nova chegue ao Docker Hub?
+**Pergunta 3: Qual é o nome completo e a tag da imagem que você publicou no Docker Hub?**
+> `guilhermeoliveiraramos/viaserra-portal:1.0-26176109`
 
-## Parte 3 · Página de manutenção
+**Pergunta 4: O que aconteceria na correção se o repositório no Docker Hub estivesse marcado como privado?**
+> O professor (ou o verificador automático) não conseguiria descarregar a imagem (`docker pull`) sem estar autenticado com as credenciais da conta proprietária, resultando em erro de acesso negado (*access denied*) e nota zero nesta etapa.
 
-5. Preencha uma linha por defeito encontrado. Defeito inexistente listado aqui desconta pontos.
+---
 
-| # | Instrução | O que estava errado | O que você viu acontecer | Como corrigiu |
-|---|---|---|---|---|
-| 1 | | | | |
-| 2 | | | | |
-| 3 | | | | |
+### Parte 3 · A página de manutenção
 
-6. Qual a diferença entre `-p 7042:80` e `-p 80:7042` no `docker run`? Qual dos dois números é a porta do container?
+**Pergunta 5: Tabela de defeitos encontrados no Dockerfile da página de manutenção**
 
-## Parte 4 · Primeiro docker-compose
+| Defeito | O que aconteceu ao rodar | Como foi corrigido |
+| :--- | :--- | :--- |
+| **Defeito 1: `WORKDIR` incorreto** | Apontava para `/usr/share/nginx` em vez do diretório do site `/usr/share/nginx/html`. | Removido o `WORKDIR` incorreto e ajustado o destino no comando de cópia. |
+| **Defeito 2: Ausência do `COPY`** | Os ficheiros de `manutencao/site/` não eram copiados para dentro da imagem. | Adicionada a instrução `COPY site/ /usr/share/nginx/html/`. |
+| **Defeito 3: Container encerra ao iniciar (`Exited 0`)** | Faltava o comando para manter o processo do Nginx ativo em primeiro plano. | Adicionada a instrução `CMD ["nginx", "-g", "daemon off;"]`. |
 
-7. Escreva os dois comandos `docker run` que fariam o mesmo que o seu `docker-compose.yml`.
+**Pergunta 6: Por que a ordem das instruções no Dockerfile altera o aproveitamento do cache durante o `docker build`?**
+> O Docker executa o `build` em camadas ordenadas de cima para baixo. Se uma instrução for alterada, todas as camadas seguintes têm o cache invalidado e precisam de ser reconstruídas. Por isso, instruções que mudam com pouca frequência (como dependências e instalações) devem ficar no topo, enquanto ficheiros de código e configurações que mudam frequentemente devem ficar no final.
 
-8. Qual comando derruba os dois containers de uma vez?
+---
 
-## Verificador
+### Parte 4 · Primeiro docker-compose
 
-9. Código de conclusão impresso pelo verificador:VIASERRA-26176109-B0C12B03
+**Pergunta 7: Qual é a vantagem de utilizar o `docker-compose.yml` em vez de executar múltiplos comandos `docker run` manualmente?**
+> O Docker Compose permite definir toda a infraestrutura de múltiplos containers de forma declarativa num único ficheiro de configuração. Isso evita ter de memorizar ou digitar comandos extensos e suscetíveis a erros no terminal, garantindo a orquestração e inicialização padronizada de toda a aplicação com um simples `docker compose up -d`.
 
-```
-(cole aqui)
-```
+**Pergunta 8: O que acontece com os containers criados pelo Compose se o arquivo `docker-compose.yml` for alterado e o comando `docker compose up -d` for executado novamente?**
+> O Docker Compose analisa as diferenças entre o ficheiro atualizado e os containers em execução. Ele recria apenas os serviços cujas configurações ou imagens sofreram alterações, mantendo os restantes containers intactos e sem interrupções desnecessárias.
+
+---
+
+### Parte 5 · Verificador e Entrega
+
+**Pergunta 9: Cole aqui o código de conclusão gerado pelo verificador:**
+> *(Substitua este texto pelo código único exibido no terminal após rodar o verificador)*
